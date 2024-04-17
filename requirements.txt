@@ -1,0 +1,4 @@
+flash_attn==2.5.2
+jaxtyping==0.2.28
+torch==2.2.2
+triton==2.0.0.dev20221202

@@ -6,15 +6,17 @@ from hydragen_algo import hydragen_attention, attention_prefix
 torch.set_default_device("cuda")
 torch.manual_seed(1337)
 
-b = 256
+b = 1024
 nq = 1
-prefix_len = 512
+prefix_len = 2048
 suffix_len = 1
 hq = 32
-hkv = 32
+hkv = 8
 d = 128
 
 GENERATION_LEN = 100
+
+# torch.cuda.memory._record_memory_history()
 
 prefix_k = torch.randn(prefix_len, hkv, d, dtype=torch.bfloat16)
 prefix_v = torch.randn(prefix_len, hkv, d, dtype=torch.bfloat16)
@@ -41,6 +43,7 @@ for _ in range(GENERATION_LEN):
         timing.append((e-s)/1_000_000)
     print("Hydragen out shape:", hydragen_out.shape)
 
+# torch.cuda.memory._dump_snapshot("artifacts/hydragen_memory_dump.pickle")
 print(hydragen_out)
 torch.save(hydragen_out.to('cpu'), 'artifacts/hydragen_out.pt')
 print(f"Average time: {sum(timing)/len(timing)} ms")

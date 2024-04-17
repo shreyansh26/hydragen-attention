@@ -47,7 +47,7 @@ def hydragen_attention(q: Float32[Tensor, "batch num_queries qheads dim"], prefi
     # efficient attention over prefixes
     # prefix_out: shape [1, batch * nq, hq, dim]
     # prefix_lse: shape [1, hq, batch * nq]
-    prefix_out, prefix_lse = attention_prefix(batched_q, prefix_k.unsqueeze(0), prefix_v.unsqueeze(0))
+    prefix_out, prefix_lse = attention_suffix(batched_q, prefix_k.unsqueeze(0), prefix_v.unsqueeze(0))
 
     # print(prefix_out.shape)
     # print(prefix_lse.shape)

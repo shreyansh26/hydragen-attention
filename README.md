@@ -4,6 +4,6 @@ The [paper](https://arxiv.org/abs/2402.05099) shows an efficient inference techn
 
 This repository has the core implementation of the algortihm and a comparison with using FlashAttention.
 
-At higher batch sizes, Flash Attention has a high mwmory utilzation, but Hydragen is able to handle it quite easily. 
+At higher batch sizes, Flash Attention has a high memory utilzation, but Hydragen is able to handle it quite easily. 
 
 Still a work in progress.

@@ -14,7 +14,7 @@ hq = 32
 hkv = 8
 d = 128
 
-GENERATION_LEN = 512
+GENERATION_LEN = 100
 
 # torch.cuda.memory._record_memory_history()
 
@@ -34,9 +34,9 @@ torch.cuda.empty_cache()
 
 timing = []
 
-# Benchmark decoding
-s = time.time_ns()
-for _ in range(GENERATION_LEN):    
+for _ in range(GENERATION_LEN):
+    print(_)
+    
     q = torch.randn(b, nq, hq, d, dtype=torch.bfloat16)
     new_k = torch.randn(b, nq, hkv, d, dtype=torch.bfloat16)
     new_v = torch.randn(b, nq, hkv, d, dtype=torch.bfloat16)
@@ -44,38 +44,15 @@ for _ in range(GENERATION_LEN):
     k = torch.cat((k, new_k), dim=1)
     v = torch.cat((v, new_v), dim=1)
 
+    s = time.time_ns()
     flash_out, lse = attention_suffix(q, k, v)
+    e = time.time_ns()
 
-e = time.time_ns()
+    if _ >= 10: # Account for bit of warmup
+        timing.append((e-s)/1_000_000)
+    print("Flash out shape:", flash_out.shape)
 
 # torch.cuda.memory._dump_snapshot("artifacts/flash_memory_dump.pickle")
-# torch.save(flash_out.to('cpu'), 'artifacts/flash_out.pt')
 print(flash_out)
-total_time = (e-s)/1_000_000_000
-print(f"Total time: {total_time} seconds")
-print(f"Tok/s: {(GENERATION_LEN*b)/total_time}")
-print(f"Max memory allocated: {torch.cuda.max_memory_allocated() / 1e9} GB")
-
-# Benchmark Attention computation part only
-# for _ in range(GENERATION_LEN):
-#     print(_)
-    
-#     q = torch.randn(b, nq, hq, d, dtype=torch.bfloat16)
-#     new_k = torch.randn(b, nq, hkv, d, dtype=torch.bfloat16)
-#     new_v = torch.randn(b, nq, hkv, d, dtype=torch.bfloat16)
-
-#     k = torch.cat((k, new_k), dim=1)
-#     v = torch.cat((v, new_v), dim=1)
-
-#     s = time.time_ns()
-#     flash_out, lse = attention_suffix(q, k, v)
-#     e = time.time_ns()
-
-#     if _ >= 10: # Account for bit of warmup
-#         timing.append((e-s)/1_000_000)
-#     print("Flash out shape:", flash_out.shape)
-
-# # torch.cuda.memory._dump_snapshot("artifacts/flash_memory_dump.pickle")
-# # torch.save(flash_out.to('cpu'), 'artifacts/flash_out.pt')
-# print(flash_out)
-# print(f"Average time: {sum(timing)/len(timing)} ms")
+torch.save(flash_out.to('cpu'), 'artifacts/flash_out.pt')
+print(f"Average time: {sum(timing)/len(timing)} ms")
